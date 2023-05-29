@@ -40,7 +40,8 @@
       20px auto 0; background-color: white; border-radius: 10px; opacity: 0; }
       &:hover { &::before { transform: scale(30); transition: .5s; animation:
       mymove .5s; } } } @keyframes mymove { 0% {opacity: .1;} 50% {opacity: .5;}
-      100% {opacity: 0;} }
+      100% {opacity: 0;} } background-color: #f44336 !important; color: #fff
+      !important; }
 
     </style>
   </head>
@@ -74,27 +75,26 @@
       </thead>
       <tbody class='employees-table-body'>
         {{#each users}}
-          <tr>
+          <tr class="{{#if blocked}}blocked-user{{/if}}">
             <td>{{id}}</td>
             <td>{{username}}</td>
             <td>{{first_name}}</td>
             <td>{{last_name}}</td>
             <td>
-
               {{#if blocked}}
-                <button class='unblock-btn'>
+                <button class='unblock-btn' onclick="toggleUserStatus('{{id}}', false)">
                   <i class='material-icons'></i>
                   Unblock
                 </button>
               {{else}}
-                <button class='block-btn'>
+                <button class='block-btn' onclick="toggleUserStatus('{{id}}', true)">
                   <i class='material-icons'></i>
                   Block
                 </button>
               {{/if}}
-              <button class='delete-btn'>
+              <button class='delete-btn' onclick="deleteUser('{{id}}')">
                 <i class='material-icons'></i>
-                delete
+                Delete
               </button>
 
             </td>
@@ -106,50 +106,116 @@
       src='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js'
     ></script>
     <script>
+ async function toggleUserStatus(userId, isBlocked) {
+        try {
+          const endpoint = isBlocked ? `/users/${userId}/blocked` : `/users/${userId}/unblocked`;
+    const response = await fetch(endpoint,{
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ blocked: isBlocked }),
+          });
 
-      async function unblockuser(id) { try { const response = await
-      fetch(`/users/${id}/blocked`, { method: "patch", headers: {
-      "content-type": "application/json", }, body: json.stringify({ blocked:
-      false }), }); if (!response.ok) { throw new error("failed to unblock
-      user"); } getusers(); } catch (error) { console.error(error); } } async
-      function blockuser(id) { try { const response = await
-      fetch(`/users/${id}/blocked`, { method: "patch", headers: {
-      "content-type": "application/json", }, body: json.stringify({ blocked:
-      true }), }); if (!response.ok) { throw new error("failed to block user");
-      } getusers(); } catch (error) { console.error(error); } } async function
-      deleteuser(id) { try { const response = await fetch(`/users/${id}`, {
-      method: "delete", headers: { "content-type": "application/json", }, }); if
-      (!response.ok) { throw new error("failed to delete user"); } getusers(); }
-      catch (error) { console.error(error); } } async function getusers() { try
-      { const response = await fetch("/users", { headers: { "content-type":
-      "application/json", }, }); if (!response.ok) { throw new error("failed to
-      fetch users"); } const users = await response.json(); displayusers(users);
-      } catch (error) { console.error(error); } } function displayusers(users) {
-      const usertablebody = document.queryselector(".employees-table-body");
-      usertablebody.innerhtml = ""; users.foreach((user) => { const row =
-      document.createelement("tr"); row.innerhtml = ` <td>${user.id}</td>
-      <td>${user.username}</td> <td>${user.first_name}</td>
-      <td>${user.last_name}</td> <td> ${ user.blocked ? `<button
-      class="unblock-btn"><i class='material-icons'></i>block</button>` :
-      `<button class="block-btn"><i class='material-icons'></i>unblock</button>`
-      } <button class="delete-btn"><i class='material-icons'></i>delete</button>
-      </td> `; usertablebody.appendchild(row); }); attacheventlisteners(); } //
-      attach event listeners to dynamically created buttons function
-      attacheventlisteners() { const unblockbuttons =
-      document.queryselectorall(".unblock-btn"); const blockbuttons =
-      document.queryselectorall(".block-btn"); const deletebuttons =
-      document.queryselectorall(".delete-btn"); unblockbuttons.foreach((button)
-      => { button.addeventlistener("click", () => { const id =
-      button.parentnode.parentnode.queryselector( "td:first-child"
-      ).textcontent; unblockuser(id); }); }); blockbuttons.foreach((button) => {
-      button.addeventlistener("click", () => { const id =
-      button.parentnode.parentnode.queryselector( "td:first-child"
-      ).textcontent; blockuser(id); }); }); deletebuttons.foreach((button) => {
-      button.addeventlistener("click", () => { const id =
-      button.parentnode.parentnode.queryselector( "td:first-child"
-      ).textcontent; deleteuser(id); }); }); } // call getusers initially to
-      populate the table getusers(); attacheventlisteners();
+          if (response.ok) {
+            console.log(`User ${userId} status updated successfully`);
+            // Update the table body
+            const userTableBody = document.querySelector('.employees-table-body');
+            const updatedUsersResponse = await fetch('/users');
+            
+            if (updatedUsersResponse.ok) {
+              const updatedUsers = await updatedUsersResponse.json();
+              userTableBody.innerHTML = ''; // Clear existing rows
+              updatedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = user.blocked ? 'blocked-user' : '';
+                row.innerHTML = `
+                  <td>${user.id}</td>
+                  <td>${user.username}</td>
+                  <td>${user.first_name}</td>
+                  <td>${user.last_name}</td>
+                  <td>
+                    ${user.blocked
+                      ? `<button class='unblock-btn' onclick="toggleUserStatus('${user.id}', false)">
+                          <i class='material-icons'></i>
+                          Unblock
+                        </button>`
+                      : `<button class='block-btn' onclick="toggleUserStatus('${user.id}', true)">
+                          <i class='material-icons'></i>
+                          Block
+                        </button>`
+                    }
+                    <button class='delete-btn' onclick="deleteUser('${user.id}')">
+                      <i class='material-icons'></i>
+                      Delete
+                    </button>
+                  </td>
+                `;
+                userTableBody.appendChild(row);
+              });
+            } else {
+              console.error('Failed to fetch updated user data');
+            }
+          } else {
+            console.error(`Failed to update user ${userId} status`);
+          }
+        } catch (error) {
+          console.error(`Error updating user ${userId} status:`, error);
+        }
+      }
 
+      // Function to delete a user
+      async function deleteUser(userId) {
+        try {
+          const response = await fetch(`/users/${userId}`, {
+            method: 'DELETE',
+          });
+
+          if (response.ok) {
+            console.log(`User ${userId} deleted successfully`);
+            const userTableBody = document.querySelector('.employees-table-body');
+            const updatedUsersResponse = await fetch('/users');
+            
+            if (updatedUsersResponse.ok) {
+              const updatedUsers = await updatedUsersResponse.json();
+              userTableBody.innerHTML = ''; // Clear existing rows
+              updatedUsers.forEach(user => {
+                const row = document.createElement('tr');
+                row.className = user.blocked ? 'blocked-user' : '';
+                row.innerHTML = `
+                  <td>${user.id}</td>
+                  <td>${user.username}</td>
+                  <td>${user.first_name}</td>
+                  <td>${user.last_name}</td>
+                  <td>
+                    ${user.blocked
+                      ? `<button class='unblock-btn' onclick="toggleUserStatus('${user.id}', false)">
+                          <i class='material-icons'></i>
+                          Unblock
+                        </button>`
+                      : `<button class='block-btn' onclick="toggleUserStatus('${user.id}', true)">
+                          <i class='material-icons'></i>
+                          Block
+                        </button>`
+                    }
+                    <button class='delete-btn' onclick="deleteUser('${user.id}')">
+                      <i class='material-icons'></i>
+                      Delete
+                    </button>
+                  </td>
+                `;
+                userTableBody.appendChild(row);
+              });
+            } else {
+              console.error('Failed to fetch updated user data');
+            }
+          } else {
+            console.error(`Failed to delete user ${userId}`);
+          }
+        } catch (error) {
+          console.error(`Error deleting user ${userId}:`, error);
+        }
+      }
     </script>
   </body>
 </html>

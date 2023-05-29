@@ -6,7 +6,6 @@ import { config } from 'dotenv';
 import * as cookieParser from 'cookie-parser';
 config();
 async function bootstrap() {
-  const port = process.env.PORT || 3000;
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.use(cookieParser());
   app.useStaticAssets(join(__dirname, '..', 'public'));
@@ -15,6 +14,6 @@ async function bootstrap() {
   app.enableCors({
     credentials: true,
   });
-  await app.listen(port);
+  await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
