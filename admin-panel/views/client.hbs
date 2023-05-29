@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <title>Panel</title>
+    <style>
+
+      @import
+      url("https://fonts.googleapis.com/css?family=Montserrat:400,500,600,700");
+      @import url("https://fonts.googleapis.com/css?family=Archivo+Black"); body
+      { box-sizing: border-box; background-color: #fbc531; font-family:
+      "Montserrat", sans-serif; margin: 0; } .table-title { margin: 50px auto;
+      max-width: 600px; text-transform: uppercase; text-align: center;
+      font-family: "Archivo Black", sans-serif; font-size: 2.5em; color: #222; }
+      .employees-table { margin: 10% auto; max-width: 700px; width: 100%;
+      border-collapse: collapse; text-align: left; border-radius: 8px; overflow:
+      hidden; box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1); } .employees-table-head
+      th { padding: 15px 15px; text-transform: uppercase; font-size: 0.9em;
+      font-weight: 700; color: #f1f1f1; background: #222; }
+      .employees-table-body tr { background: #fff; transition: ease-in-out 0.3s;
+      } .employees-table-body tr:nth-child(even) { background: #fafafa; }
+      .employees-table-body tr:hover { background: #222; color: #f1f1f1; }
+      .employees-table-body td { padding: 15px 15px; font-size: 0.9em;
+      font-weight: 600; cursor: pointer; } .employees-table-body tr i { color:
+      transparent; transition: ease-in-out 0.3s; } .employees-table-body
+      tr:hover i { color: #e74c3c; } .employees-table-body tr button:hover {
+      color: #c0392b; } header { width: 100%; padding-top: 50px; background:
+      #000; transition: 0.7s all; z-index: 100; } body.header-fixed header {
+      position: fixed; top: 0; right: 0; padding-top: 0; width: 100%; z-index:
+      2; } li { list-style: none; } nav { overflow: hidden; } nav ul { float:
+      right; } nav li { display: inline; float: left; } nav a { display:
+      inline-block; color: #fff; text-decoration: none; padding: 25px;
+      transition: 0.3s all; } nav a:hover { background: red; } .logo { float:
+      left; color: #fff; font-size: 50px; } button { color:#fff; relative;
+      z-index: 1; display: block; padding: 10px; margin: 2px; background-color:
+      #fbc531; border-radius: 30px; border:0; text-align: center;
+      text-decoration: none; text-transform: uppercase; color: black; overflow:
+      hidden; &::before { content: ''; position: absolute; top: 0; left: 0;
+      right: 0; z-index: -1; display: block; width: 10px; height: 10px; margin:
+      20px auto 0; background-color: white; border-radius: 10px; opacity: 0; }
+      &:hover { &::before { transform: scale(30); transition: .5s; animation:
+      mymove .5s; } } } @keyframes mymove { 0% {opacity: .1;} 50% {opacity: .5;}
+      100% {opacity: 0;} }
+
+    </style>
+  </head>
+  <body>
+    <header id='topnav'>
+      <div class='inner'>
+        <div class='logo'>Admin Panel</div>
+        <nav role='navigation'>
+          <ul>
+            <li>
+              <li><a href='/users/panel'>Users</a></li>
+            </li>
+            <li><a href='/clients/panel'>Clients</a></li>
+            <li>
+              <a href='/auth/signup' class='button'>Signup</a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <table class='employees-table' id='userTableBody'>
+      <thead class='employees-table-head'>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Key</th>
+        </tr>
+
+      </thead>
+      <tbody class='employees-table-body'>
+        {{#each clients}}
+          <tr>
+            <td>{{id}}</td>
+            <td>{{name}}</td>
+            <td>{{key}}</td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    <script
+      src='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js'
+    ></script>
+  </body>
+</html>

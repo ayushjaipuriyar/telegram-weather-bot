@@ -1,9 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
-const axios = require("axios");
 const mongoose = require("mongoose");
 require("dotenv").config();
 const { MongoClient } = require("mongodb");
-const cron = require("node-cron");
 const { User } = require("./models");
 const { getForecast, getWeather } = require("./weather");
 const { reverseGeo } = require("./location");
@@ -29,10 +27,8 @@ const bot = new TelegramBot(token, {
   polling: true,
 });
 
-
-
 bot.on("polling_error", (msg) => console.log(msg));
-
+startCronJobs();
 bot.onText(/\/weather/, (msg) => {
   const chatId = msg.chat.id;
   const opts = {
@@ -89,8 +85,8 @@ bot.on("callback_query", function onCallbackQuery(callbackQuery) {
   } else if (action === "getName") {
     bot.once("message", (nextMsg) => {
       const city = nextMsg.text;
-      getWeather(bot,msg.chat.id, city);
-      getForecast(bot,msg.chat.id, city);
+      getWeather(bot, msg.chat.id, city);
+      getForecast(bot, msg.chat.id, city);
     });
     bot.sendMessage(msg.chat.id, "Please enter the city name.");
   }
@@ -116,15 +112,15 @@ bot.on("location", (msg) => {
   const chatId = msg.chat.id;
   const lon = msg.location.longitude;
   const lat = msg.location.latitude;
-  reverseGeo(bot,chatId, lon, lat);
+  reverseGeo(bot, chatId, lon, lat);
 });
 
 bot.onText(/\/subscribe/, async (msg) => {
   const chatId = msg.chat.id;
-  
+
   try {
     const user = await User.findOne({ id: chatId });
-    
+
     if (user) {
       if (user.subscribed) {
         bot.sendMessage(chatId, "You are already subscribed");
@@ -142,7 +138,7 @@ bot.onText(/\/subscribe/, async (msg) => {
         subscribed: true,
         blocked: false,
       });
-      
+
       await newUser.save();
       bot.sendMessage(chatId, "You are now subscribed");
     }
@@ -150,7 +146,6 @@ bot.onText(/\/subscribe/, async (msg) => {
     console.error("Error saving user:", error);
   }
 });
-
 
 bot.onText(/\/unsubscribe/, (msg) => {
   const chatId = msg.chat.id;
